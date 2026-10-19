@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffd21f"><meta name="description" content="Pide un taxi en Elda y Petrer con Taxi Local.">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
+<title>Taxi Local — Elda y Petrer</title>
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-icon">🚕</span><div><strong>TAXI LOCAL</strong><small>ELDA · PETRER</small></div></div><span class="pilot">PILOTO GRATUITO</span></header>
+<main>
+<section id="home" class="screen active">
+  <div class="hero"><span class="eyebrow">TU TAXI, MÁS CERCA</span><h1>Muévete por<br><em>Elda y Petrer.</em></h1><p>Solicita un taxi en unos pocos pasos. Sin pagos dentro de la aplicación durante la fase piloto.</p><div class="town-pills"><span>● Elda</span><span>● Petrer</span></div></div>
+  <div class="panel" id="account-panel">
+    <div class="section-head"><h2>Acceso al piloto</h2><p>Regístrate o inicia sesión para compartir viajes entre dispositivos.</p></div>
+    <form id="auth-form">
+      <label>Nombre completo<input name="fullName" autocomplete="name" maxlength="100" placeholder="Tu nombre" required></label>
+      <label>Teléfono<input name="phone" type="tel" autocomplete="tel" maxlength="30" placeholder="Teléfono de contacto" required></label>
+      <label>Localidad<select name="town" required><option value="">Elige localidad</option><option>Elda</option><option>Petrer</option></select></label>
+      <label>Tipo de cuenta<select name="role" required><option value="rider">Cliente</option><option value="driver">Conductor (requiere aprobación)</option></select></label>
+      <label>Correo electrónico<input name="email" type="email" autocomplete="email" required placeholder="tu@correo.com"></label>
+      <label>Contraseña<input name="password" type="password" minlength="8" autocomplete="current-password" required placeholder="Mínimo 8 caracteres"></label>
+      <div class="two"><button class="primary" type="submit" name="mode" value="signup">Crear cuenta</button><button class="secondary" type="button" id="login-button">Iniciar sesión</button></div>
+    </form>
+    <div id="account-state" class="tiny muted" aria-live="polite">Backend sin configurar: la app solo permite demostración local hasta introducir las credenciales públicas de Supabase.</div>
+    <button id="logout-button" class="secondary hidden" type="button">Cerrar sesión</button>
+  </div>
+  <div class="home-actions"><button class="primary big" data-go="request">🚕 &nbsp; Pedir un taxi <span>→</span></button><button class="secondary big" data-go="driver">Soy conductor <span>→</span></button></div>
+  <div class="notice"><span>ℹ️</span><div><strong>Versión piloto</strong><p>La versión multi-dispositivo requiere configurar Supabase, aplicar el esquema SQL y aprobar las cuentas de conductores antes de aceptar viajes reales.</p></div></div>
+  <p class="muted tiny center">Servicio piloto · Elda y Petrer · Sin pagos ni suscripciones</p>
+</section>
+<section id="request" class="screen">
+  <button class="back" data-go="home">← Volver</button><div class="section-head"><span class="eyebrow">NUEVA SOLICITUD</span><h2>¿Dónde te recogemos?</h2><p>Indica los datos para que el conductor pueda localizarte.</p></div>
+  <form id="ride-form" class="panel">
+    <label>Localidad<select name="town" required><option value="">Elige localidad</option><option>Elda</option><option>Petrer</option></select></label>
+    <label>Dirección de recogida<input name="pickup" required maxlength="160" placeholder="Calle, número o punto conocido"></label>
+    <button type="button" id="gps" class="gps">◎ Usar mi ubicación actual</button><p id="gps-status" class="muted tiny" aria-live="polite">Puedes escribir la dirección si prefieres no compartir GPS.</p>
+    <label>Destino (opcional)<input name="destination" maxlength="160" placeholder="¿A dónde vas?"></label>
+    <div class="two"><label>Pasajeros<select name="passengers"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></label><label>Tipo de viaje<select name="when"><option value="now">Lo antes posible</option><option value="later">Reserva</option></select></label></div>
+    <label id="date-wrap" class="hidden">Fecha y hora de reserva<input name="scheduledAt" type="datetime-local"></label>
+    <label>Teléfono de contacto<input name="phone" type="tel" required maxlength="30" autocomplete="tel" placeholder="Tu número de teléfono"></label>
+    <label>Detalles (opcional)<textarea name="notes" rows="2" maxlength="300" placeholder="Maletas, accesibilidad u otra indicación"></textarea></label>
+    <label class="consent"><input type="checkbox" name="consent" required><span>Confirmo que los datos son correctos y acepto que se usen para gestionar esta solicitud.</span></label>
+    <button class="primary" type="submit">Enviar solicitud →</button><p class="tiny muted">Piloto local: tus datos se guardan en el almacenamiento de este navegador, no se envían a una central.</p>
+  </form>
+  <div id="request-result" class="result hidden" aria-live="polite"></div>
+</section>
+<section id="driver" class="screen">
+  <button class="back" data-go="home">← Volver</button><div class="section-head"><span class="eyebrow">ZONA PROFESIONAL</span><h2>Panel del conductor</h2><p>Gestiona la disponibilidad y prueba el flujo de solicitudes en este dispositivo.</p></div>
+  <div class="driver-status panel"><div><strong>Estado del servicio</strong><p id="driver-status-text" class="muted">No disponible</p></div><button id="availability" class="toggle" aria-pressed="false">Activar</button></div>
+  <div class="stats"><div><strong id="pending-count">0</strong><span>Pendientes</span></div><div><strong id="accepted-count">0</strong><span>Aceptados</span></div><div><strong id="completed-count">0</strong><span>Completados</span></div></div>
+  <div class="list-head"><h3>Solicitudes de viaje</h3><button id="refresh" class="text-button">Actualizar ↻</button></div><div id="rides-list" class="rides-list"></div>
+  <div class="notice"><span>⚠️</span><div><strong>Antes de operar con pasajeros</strong><p>Este panel no verifica licencias, identidad ni disponibilidad real. No uses esta versión local para gestionar servicios comerciales hasta conectar y asegurar el backend.</p></div></div>
+</section>
+<section id="history" class="screen"><button class="back" data-go="home">← Volver</button><div class="section-head"><h2>Mis solicitudes</h2><p>Historial guardado en este navegador.</p></div><div id="history-list" class="rides-list"></div></section>
+</main>
+<nav class="bottom-nav"><button class="nav-item active" data-go="home"><span>⌂</span>Inicio</button><button class="nav-item" data-go="request"><span>＋</span>Pedir taxi</button><button class="nav-item" data-go="history"><span>▤</span>Mis viajes</button></nav>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body></html>
