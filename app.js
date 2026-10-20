@@ -160,8 +160,17 @@
     const {data,error}=await db.rpc('create_public_ride',payload);
     btn.disabled=false;btn.textContent='Solicitar taxi →';
     if(error){notify('No se pudo enviar la solicitud: '+error.message);return;}
-    const item=Array.isArray(data)?data[0]:data;
-    if(!item?.ride_id||!item?.tracking_token){notify('El servidor no devolvió la referencia de seguimiento.');return;}
+    const rawItem = Array.isArray(data) ? data[0] : data;
+
+const item = rawItem ? {
+  ride_id: rawItem.ride_id,
+  tracking_token: rawItem.tracking_token || rawItem.access_token
+} : null;
+
+if (!item?.ride_id || !item?.tracking_token) {
+  notify('El servidor no devolvió la referencia de seguimiento.');
+  return;
+}
     startTracking(item);notify('Solicitud enviada.');$('#request-result').scrollIntoView({behavior:'smooth',block:'center'});
   });
 
